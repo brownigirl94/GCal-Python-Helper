@@ -60,7 +60,7 @@ def callForEvents(start, end, max = 100):
         calendarId='primary', timeMin=now, timeMax = up_to, maxResults=max, singleEvents=True,
         orderBy='startTime').execute()
 
-def sortEvents(start, end, event_to_count):
+def sortEvents(start, end, event_to_count, info=False):
     """Sorts through events from start to end parameters
 
     """
@@ -80,12 +80,13 @@ def sortEvents(start, end, event_to_count):
             duration = end_obj-start_obj
             secs = duration.total_seconds()
             hours = secs/60/60
-        if event_to_count in title:
-            count+=hours
+            if event_to_count in title:
+                count+=hours
+                if (info): print ("Event found: ", title ,". Hours this event takes: ", hours)
     print ('--------------------------------------------')
     print ('hours spent on ', event_to_count, ': ', count)
 
-def range_option(m1, d1, m2, d2, pacific_time=True):
+def range_option(m1, d1, m2, d2, printB, pacific_time=True):
     """ Counts events in the specified month-date-month-date.
     Hardcoded to 2018 as the year, may add option to add year paramater
     Default to pacific time, may add option for other time zones
@@ -97,27 +98,27 @@ def range_option(m1, d1, m2, d2, pacific_time=True):
         offset = datetime.timedelta(hours = 8)
         date_min += offset
         date_max += offset
-    #todo: add a parameter for inputing text in command line
+    #todo: add a parameter for just inputing text in command line
     text = raw_input("What event do you want to search for?")
-    sortEvents(date_min, date_max, text.lower())
+    sortEvents(date_min, date_max, text.lower(), printB)
 
-def default():
-    days = input("How many days from now do you want to check? (excludes the nth day) ")
+def default(printB):
+    days = int(input("How many days from now do you want to check? (excludes the nth day)"))
     print ('Getting the upcoming', days, 'days')
     now = datetime.datetime.utcnow()
     up_to = now + datetime.timedelta(days=days)
     # TODO: catch bad inputs! this was scraped together quickly, sorry
     text = raw_input("What event do you want to search for? ")
-    sortEvents(now, up_to, text.lower())
+    sortEvents(now, up_to, text.lower(), printB)
 
 def getopts(argv):
-    opts = {} 
-    while argv:  
+    opts = {}
+    while argv:
         toSlice = 1
-        if (argv[0] == '-mdmd'): 
-            opts[argv[0]] = [int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4])] 
+        if (argv[0] == '-mdmd'):
+            opts[argv[0]] = [int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4])]
             toSlice = 4 
-        elif (argv[0] == '-p'):
+        elif (argv[0][0] == '-'):
             opts[argv[0]] = True
         argv = argv[toSlice:]
     return opts
@@ -125,11 +126,14 @@ def getopts(argv):
 if __name__ == '__main__':
     from sys import argv
     myargs = getopts(argv)
-    if '-mdmd' in myargs:  
-        param = myargs['-mdmd']
-        if '-p' in myargs:
-            range_option(param[0],param[1],param[2],param[3], True)   
-        else:
-            range_option(param[0],param[1],param[2],param[3])    
+    if '-ask' in myargs:
+        range_ask()
+    printB = False
+    if '-p' in myargs:
+        printB = True
+    if '-mdmd' in myargs:  # Example usage.
+        param = myargs['-mdmd']     
+        range_option(param[0],param[1],param[2],param[3], printB)     
     else:
-        default()
+        default(printB)
+    # todos: many. but start with fixing indents and adding tess
