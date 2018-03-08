@@ -64,7 +64,7 @@ def sortEvents(start, end, event_to_count):
     """Sorts through events from start to end parameters
 
     """
-    eventsResult = getEvents(start, end)
+    eventsResult = callForEvents(start, end)
     events = eventsResult.get('items', [])
 
     if not events:
@@ -80,7 +80,7 @@ def sortEvents(start, end, event_to_count):
             duration = end_obj-start_obj
             secs = duration.total_seconds()
             hours = secs/60/60
-        if 'event_to_count' in title:
+        if event_to_count in title:
             count+=hours
     print ('--------------------------------------------')
     print ('hours spent on ', event_to_count, ': ', count)
@@ -97,14 +97,18 @@ def range_option(m1, d1, m2, d2, pacific_time=True):
         offset = datetime.timedelta(hours = 8)
         date_min += offset
         date_max += offset
-    sortEvents(date_min, date_max)
+    #todo: add a parameter for inputing text in command line
+    text = raw_input("What event do you want to search for?")
+    sortEvents(date_min, date_max, text.lower())
 
 def default():
     days = input("How many days from now do you want to check? (excludes the nth day) ")
     print ('Getting the upcoming', days, 'days')
     now = datetime.datetime.utcnow()
     up_to = now + datetime.timedelta(days=days)
-    sortEvents(now, up_to)
+    # TODO: catch bad inputs! this was scraped together quickly, sorry
+    text = raw_input("What event do you want to search for? ")
+    sortEvents(now, up_to, text.lower())
 
 def getopts(argv):
     opts = {} 
